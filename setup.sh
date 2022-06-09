@@ -7,4 +7,4 @@ sudo apt-get install libnuma-dev
 #make all the cpp libraries
 cd ./c-cpp
 make clean
-make
+make -j 10
