@@ -22,6 +22,15 @@
  */
 
 #include "intset.h"
+#include <stdlib.h>
+
+//MODIFIED PART BY MADHAVA
+#define SIZE 1000000                      //size of the arrays, number of values, change if number of values change
+#define INIT_PATH   "../data/init.csv"    //path for searching for 'initialised' values
+#define UPDATE_PATH "../data/update.csv"  //path for searching for 'updating' values
+#define DELETE_PATH "../data/delete.csv"  //path for searching for 'delete' values
+#define SEARCH_PATH "../data/search.csv"  //path for searching for 'search' values
+//END OF MODIFIED PART BY MADHAVA
 
 typedef struct barrier {
   pthread_cond_t complete;
@@ -366,6 +375,35 @@ int main(int argc, char **argv)
     srand(seed);
 	
   set = set_new_l();
+
+    //MODIFIED PART BY MADHAVA
+  FILE* init_vals   = fopen(INIT_PATH  , "r");
+  FILE* update_vals = fopen(UPDATE_PATH, "r");
+  FILE* delete_vals = fopen(DELETE_PATH, "r");
+  FILE* search_vals = fopen(SEARCH_PATH, "r");
+
+  int* init_data   = (int*) malloc(sizeof(int) *SIZE);
+  int* update_data = (int*) malloc(sizeof(int) *SIZE);
+  int* delete_data = (int*) malloc(sizeof(int) *SIZE);
+  int* search_data = (int*) malloc(sizeof(int) *SIZE);
+
+  int iterator = 0;
+  while(iterator < SIZE){
+    fscanf(init_vals,   " %d", init_data   +iterator);
+    fscanf(update_vals, " %d", update_data +iterator);
+    fscanf(delete_vals, " %d", delete_data +iterator);
+    fscanf(search_vals, " %d", search_data +iterator);
+    iterator++;
+  }
+
+  for(iterator = 0; iterator < 53; iterator++){
+      printf("%d\n", init_data[iterator]);
+  }
+
+  printf("%d\n", init_data[SIZE-1]);
+
+
+  //END OF MODIFIED PART BY MADHAVA
 	
   stop = 0;
 	
