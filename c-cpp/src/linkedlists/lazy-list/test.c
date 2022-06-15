@@ -25,7 +25,7 @@
 #include <stdlib.h>
 
 //MODIFIED PART BY MADHAVA
-#define SIZE 1000000                      //size of the arrays, number of values, change if number of values change
+#define SIZE 35000                      //size of the arrays, number of values, change if number of values change
 #define INIT_PATH   "../data/init.csv"    //path for searching for 'initialised' values
 #define UPDATE_PATH "../data/update.csv"  //path for searching for 'updating' values
 #define DELETE_PATH "../data/delete.csv"  //path for searching for 'delete' values
@@ -151,79 +151,129 @@ void *test(void *data) {
 	
   //END OF EDITED PORTION BY MADHAVA
 
+long long int i = 0, j = 0, k = 0;
 
-  /* Is the first op an update? */
-  unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
+
+  //edited
+  // <-------------------------------------------------------------------------------------------->
+
+    
+    i = 0, j = 0, k = 0;
+    while(i<SIZE || j < SIZE || k < SIZE){
+        //insert
+        if(i < SIZE){
+          val = update_vals[i];
+          if (set_add_l(d->set, val, TRANSACTIONAL)) {
+              printf("added : %ld\n", val);
+              d->nb_added++;
+          }
+          printf("tried adding : %ld\n", val);
+          d->nb_add++;
+          i++;
+        }
+
+        //remove
+        if(j < SIZE){
+          val = delete_vals[j];
+          if (set_remove_l(d->set, val, TRANSACTIONAL)) {
+              printf("removed : %ld\n", val);
+              d->nb_removed++;
+          } 
+          printf("tried removing : %ld\n", val);
+          d->nb_remove++;
+          j++;
+        }
+
+        //contains
+        if(k < SIZE){
+          val = search_vals[k];
+          if (set_contains_l(d->set, val, TRANSACTIONAL)) {
+              printf("FOUND : %ld\n", val);
+              d->nb_found++;
+          }
+          printf("tried finding : %ld\n", val);
+          d->nb_contains++;
+          k++;	
+        }
+    }
+
+  // <-------------------------------------------------------------------------------------------->
+
+
+  // 
+  // /* Is the first op an update? */
+  // unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
 		
-  while (stop == 0) {
+  // while (stop == 0) {
 			
-    if (unext) { // update
+  //   if (unext) { // update
 				
-      if (last < 0) { // add
+  //     if (last < 0) { // add
 					
-	val = rand_range_re(&d->seed, d->range);
-	if (set_add_l(d->set, val, TRANSACTIONAL)) {
-	  d->nb_added++;
-	  last = val;
-	} 				
-	d->nb_add++;
+	// val = rand_range_re(&d->seed, d->range);
+	// if (set_add_l(d->set, val, TRANSACTIONAL)) {
+	//   d->nb_added++;
+	//   last = val;
+	// } 				
+	// d->nb_add++;
 					
-      } else { // remove
+  //     } else { // remove
 					
-	if (d->alternate) { // alternate mode
+	// if (d->alternate) { // alternate mode
 						
-	  if (set_remove_l(d->set, last, TRANSACTIONAL)) {
-	    d->nb_removed++;
-	  }
-	  last = -1;
+	//   if (set_remove_l(d->set, last, TRANSACTIONAL)) {
+	//     d->nb_removed++;
+	//   }
+	//   last = -1;
 						
-	} else {
+	// } else {
 					
-	  val = rand_range_re(&d->seed, d->range);
-	  if (set_remove_l(d->set, val, TRANSACTIONAL)) {
-	    d->nb_removed++;
-	    last = -1;
-	  } 
+	//   val = rand_range_re(&d->seed, d->range);
+	//   if (set_remove_l(d->set, val, TRANSACTIONAL)) {
+	//     d->nb_removed++;
+	//     last = -1;
+	//   } 
 					
-	}
-	d->nb_remove++;
-      }
+	// }
+	// d->nb_remove++;
+  //     }
 				
-    } else { // read
+  //   } else { // read
 				
-      if (d->alternate) {
-	if (d->update == 0) {
-	  if (last < 0) {
-	    val = d->first;
-	    last = val;
-	  } else { // last >= 0
-	    val = rand_range_re(&d->seed, d->range);
-	    last = -1;
-	  }
-	} else { // update != 0
-	  if (last < 0) {
-	    val = rand_range_re(&d->seed, d->range);
-	    //last = val;
-	  } else {
-	    val = last;
-	  }
-	}
-      }	else val = rand_range_re(&d->seed, d->range);
+  //     if (d->alternate) {
+	// if (d->update == 0) {
+	//   if (last < 0) {
+	//     val = d->first;
+	//     last = val;
+	//   } else { // last >= 0
+	//     val = rand_range_re(&d->seed, d->range);
+	//     last = -1;
+	//   }
+	// } else { // update != 0
+	//   if (last < 0) {
+	//     val = rand_range_re(&d->seed, d->range);
+	//     //last = val;
+	//   } else {
+	//     val = last;
+	//   }
+	// }
+  //     }	else val = rand_range_re(&d->seed, d->range);
 				
-      if (set_contains_l(d->set, val, TRANSACTIONAL)) 
-	d->nb_found++;
-      d->nb_contains++;			
-    }
+  //     if (set_contains_l(d->set, val, TRANSACTIONAL)) 
+	// d->nb_found++;
+  //     d->nb_contains++;			
+  //   }
 			
-    /* Is the next op an update? */
-    if (d->effective) { // a failed remove/add is a read-only tx
-      unext = ((100 * (d->nb_added + d->nb_removed))
-	       < (d->update * (d->nb_add + d->nb_remove + d->nb_contains)));
-    } else { // remove/add (even failed) is considered an update
-      unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
-    }
+  //   /* Is the next op an update? */
+  //   if (d->effective) { // a failed remove/add is a read-only tx
+  //     unext = ((100 * (d->nb_added + d->nb_removed))
+	//        < (d->update * (d->nb_add + d->nb_remove + d->nb_contains)));
+  //   } else { // remove/add (even failed) is considered an update
+  //     unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
+  //   }
 			
-  }	
+  // }	
+  
   return NULL;
 }
 
@@ -436,12 +486,14 @@ int main(int argc, char **argv)
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
   i = 0;
-  while (i < initial) {
-    val = (rand() % range) + 1;
+  while (i < SIZE) {
+    val = init_data[i];
+    printf("ADDED VALUE %d\n", val);
     if (set_add_l(set, val, 0)) {
       last = val;
-      i++;
+      //i++;
     }
+    i++;
   }
   size = set_size_l(set);
   printf("Set size     : %d\n", size);
@@ -488,15 +540,15 @@ int main(int argc, char **argv)
   barrier_cross(&barrier);
 	
   printf("STARTING...\n");
-  gettimeofday(&start, NULL);
-  if (duration > 0) {
-    nanosleep(&timeout, NULL);
-  } else {
-    sigemptyset(&block_set);
-    sigsuspend(&block_set);
-  }
-  AO_store_full(&stop, 1);
-  gettimeofday(&end, NULL);
+  // gettimeofday(&start, NULL);
+  // if (duration > 0) {
+  //   nanosleep(&timeout, NULL);
+  // } else {
+  //   sigemptyset(&block_set);
+  //   sigsuspend(&block_set);
+  // }
+  // AO_store_full(&stop, 1);
+  // gettimeofday(&end, NULL);
   printf("STOPPING...\n");
 	
   /* Wait for thread completion */
