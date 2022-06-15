@@ -120,6 +120,7 @@ typedef struct thread_data {
   unsigned long nb_aborts_invalid_memory;
   unsigned long max_retries;
   unsigned int seed;
+  int** arrays;
   intset_l_t *set;
   barrier_t *barrier;
 } thread_data_t;
@@ -133,7 +134,24 @@ void *test(void *data) {
 	
   /* Wait on barrier */
   barrier_cross(d->barrier);
+
+  //EDITED PORTION BY MADHAVA
+  int** arr_ptr = d->arrays;
+  int* update_vals = arr_ptr[0];
+  int* delete_vals = arr_ptr[1];
+  int* search_vals = arr_ptr[2];
+
+  int iterator = 0;
+
+  for(iterator = 0; iterator < 53; iterator++){
+      printf("VALUEEEEEE!!! %d\n", update_vals[iterator]);
+  }
+
+  printf("%d\n", update_vals[SIZE-1]);
 	
+  //END OF EDITED PORTION BY MADHAVA
+
+
   /* Is the first op an update? */
   unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
 		
@@ -376,7 +394,7 @@ int main(int argc, char **argv)
 	
   set = set_new_l();
 
-    //MODIFIED PART BY MADHAVA
+   //MODIFIED PART BY MADHAVA
   FILE* init_vals   = fopen(INIT_PATH  , "r");
   FILE* update_vals = fopen(UPDATE_PATH, "r");
   FILE* delete_vals = fopen(DELETE_PATH, "r");
@@ -389,19 +407,24 @@ int main(int argc, char **argv)
 
   int iterator = 0;
   while(iterator < SIZE){
-    fscanf(init_vals,   " %d", init_data   +iterator);
-    fscanf(update_vals, " %d", update_data +iterator);
-    fscanf(delete_vals, " %d", delete_data +iterator);
-    fscanf(search_vals, " %d", search_data +iterator);
+    fscanf(init_vals,   " %d", init_data   +iterator);          //RESULT IGNORED
+    fscanf(update_vals, " %d", update_data +iterator);          //RESULT IGNORED
+    fscanf(delete_vals, " %d", delete_data +iterator);          //RESULT IGNORED
+    fscanf(search_vals, " %d", search_data +iterator);          //RESULT IGNORED
     iterator++;
   }
 
-  for(iterator = 0; iterator < 53; iterator++){
-      printf("%d\n", init_data[iterator]);
-  }
+  // for(iterator = 0; iterator < 53; iterator++){
+  //     printf("%d\n", init_data[iterator]);
+  // }
 
-  printf("%d\n", init_data[SIZE-1]);
+  // printf("%d\n", init_data[SIZE-1]);
 
+  //Creating pointer to arrays
+  int** arr_ptr = malloc(3*sizeof(int*));
+  arr_ptr[0] = update_data;
+  arr_ptr[1] = delete_data;
+  arr_ptr[2] = search_data;
 
   //END OF MODIFIED PART BY MADHAVA
 	
@@ -453,6 +476,7 @@ int main(int argc, char **argv)
     data[i].seed = rand();
     data[i].set = set;
     data[i].barrier = &barrier;
+    data[i].arrays = arr_ptr;
     if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
       fprintf(stderr, "Error creating thread\n");
       exit(1);
