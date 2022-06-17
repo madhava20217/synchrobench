@@ -156,11 +156,6 @@ void *test(void *data) {
 
   int iterator = 0;
 
-  for(iterator = 0; iterator < 53; iterator++){
-      printf("VALUEEEEEE!!! %d\n", update_vals[iterator]);
-  }
-
-  printf("%d\n", update_vals[SIZE-1]);
 	
   //END OF EDITED PORTION BY MADHAVA
 
@@ -181,7 +176,7 @@ long long int i, j, k;
               printf("added : %ld\n", val);
               d->nb_added++;
           }
-          printf("tried adding : %ld\n", val);
+          //printf("tried adding : %ld\n", val);
           d->nb_add++;
           i++;
         }
@@ -193,7 +188,7 @@ long long int i, j, k;
               printf("removed : %ld\n", val);
               d->nb_removed++;
           } 
-          printf("tried removing : %ld\n", val);
+          //printf("tried removing : %ld\n", val);
           d->nb_remove++;
           j++;
         }
@@ -202,10 +197,10 @@ long long int i, j, k;
         if(k < end){
           val = search_vals[k];
           if (set_contains(d->set, val, TRANSACTIONAL)) {
-              printf("FOUND : %ld\n", val);
+              //printf("FOUND : %ld\n", val);
               d->nb_found++;
           }
-          printf("tried finding : %ld\n", val);
+          //printf("tried finding : %ld\n", val);
           d->nb_contains++;
           k++;	
         }
@@ -577,14 +572,16 @@ int main(int argc, char **argv) {
 	/* Start threads */
 	barrier_cross(&barrier);
 	
-// 	printf("STARTING...\n");
-// 	gettimeofday(&start, NULL);
-// 	if (duration > 0) {
-// 		nanosleep(&timeout, NULL);
-// 	} else {
-// 		sigemptyset(&block_set);
-// 		sigsuspend(&block_set);
-// 	}
+	printf("STARTING...\n");
+	// gettimeofday(&start, NULL);
+	// if (duration > 0) {
+	// 	nanosleep(&timeout, NULL);
+	// } else {
+	// 	sigemptyset(&block_set);
+	// 	sigsuspend(&block_set);
+	// }
+
+	clock_t start_time = clock();				//MODIFIED BY MADHAVA
 	
 // #ifdef ICC
 // 	stop = 1;
@@ -655,45 +652,44 @@ int main(int argc, char **argv) {
 		if (max_retries < data[i].max_retries)
 			max_retries = data[i].max_retries;
 	}
+
+	clock_t stop_time = clock();										//MODIFIED BY MADHAVA
+
+	double dur = (double)(stop_time - start_time)/CLOCKS_PER_SEC;
 	printf("Set size      : %d (expected: %d)\n", set_size(set), size);
-	printf("Duration      : %d (ms)\n", duration);
+	printf("Duration      : %lf (ms)\n", dur);
 	printf("#txs          : %lu (%f / s)\n", reads + updates, 
-				 (reads + updates) * 1000.0 / duration);
+				 (reads + updates) * 1000.0 / dur);
 	
 	printf("#read txs     : ");
 	if (effective) {
-		printf("%lu (%f / s)\n", effreads, effreads * 1000.0 / duration);
-		printf("  #contains   : %lu (%f / s)\n", reads, reads * 1000.0 / duration);
-	} else printf("%lu (%f / s)\n", reads, reads * 1000.0 / duration);
+		printf("%lu (%f / s)\n", effreads, effreads * 1000.0 / dur);
+		printf("  #contains   : %lu (%f / s)\n", reads, reads * 1000.0 / dur);
+	} else printf("%lu (%f / s)\n", reads, reads * 1000.0 / dur);
 	
 	printf("#eff. upd rate: %f \n", 100.0 * effupds / (effupds + effreads));
 	
 	printf("#update txs   : ");
 	if (effective) {
-		printf("%lu (%f / s)\n", effupds, effupds * 1000.0 / duration);
+		printf("%lu (%f / s)\n", effupds, effupds * 1000.0 / dur);
 		printf("  #upd trials : %lu (%f / s)\n", updates, updates * 1000.0 / 
-					 duration);
-	} else printf("%lu (%f / s)\n", updates, updates * 1000.0 / duration);
+					 dur);
+	} else printf("%lu (%f / s)\n", updates, updates * 1000.0 / dur);
 	
 	
 	printf("#aborts       : %lu (%f / s)\n", aborts, 
-				 aborts * 1000.0 / duration);
+				 aborts * 1000.0 / dur);
 	printf("  #lock-r     : %lu (%f / s)\n", aborts_locked_read, 
-				 aborts_locked_read * 1000.0 / duration);
+				 aborts_locked_read * 1000.0 / dur);
 	printf("  #lock-w     : %lu (%f / s)\n", aborts_locked_write, 
-				 aborts_locked_write * 1000.0 / duration);
+				 aborts_locked_write * 1000.0 / dur);
 	printf("  #val-r      : %lu (%f / s)\n", aborts_validate_read, 
-				 aborts_validate_read * 1000.0 / duration);
+				 aborts_validate_read * 1000.0 / dur);
 	printf("  #val-w      : %lu (%f / s)\n", aborts_validate_write, 
-				 aborts_validate_write * 1000.0 / duration);
+				 aborts_validate_write * 1000.0 / dur);
 	printf("  #val-c      : %lu (%f / s)\n", aborts_validate_commit, 
-				 aborts_validate_commit * 1000.0 / duration);
-	printf("  #inv-mem    : %lu (%f / s)\n", aborts_invalid_memory, 
-				 aborts_invalid_memory * 1000.0 / duration);
-	printf("  #dup-w      : %lu (%f / s)\n", aborts_double_write, 
-				 aborts_double_write * 1000.0 / duration);
-	printf("  #failures   : %lu\n",  failures_because_contention);
-	printf("Max retries   : %lu\n", max_retries);
+				 aborts_validate_commit * 1000.0 / dur);
+	printf("float : %lu\n", max_retries);
 	
 	/* Delete set */
 	set_delete(set);
