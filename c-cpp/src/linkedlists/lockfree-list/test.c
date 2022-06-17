@@ -22,6 +22,16 @@
  */
 
 #include "intset.h"
+#include <stdlib.h>
+
+//MODIFIED PART BY MADHAVA
+#define SIZE 1000000                      //size of the arrays, number of values, change if number of values change
+#define INIT_PATH   "../data/init.csv"    //path for searching for 'initialised' values
+#define UPDATE_PATH "../data/update.csv"  //path for searching for 'updating' values
+#define DELETE_PATH "../data/delete.csv"  //path for searching for 'delete' values
+#define SEARCH_PATH "../data/search.csv"  //path for searching for 'search' values
+//END OF MODIFIED PART BY MADHAVA
+
 
 typedef struct barrier {
 	pthread_cond_t complete;
@@ -116,6 +126,9 @@ typedef struct thread_data {
 	unsigned long nb_aborts_double_write;
 	unsigned long max_retries;
 	unsigned int seed;
+	unsigned int start_index;                                   //EDITED BY MADHAVA
+  	unsigned int end_index;                                     //EDITED BY MADHAVA
+  	int** arrays;                                               //EDITED BY MADHAVA
 	intset_t *set;
 	barrier_t *barrier;
 	unsigned long failures_because_contention;
@@ -128,95 +141,163 @@ void *test(void *data) {
 	thread_data_t *d = (thread_data_t *)data;
 	
 	/* Create transaction */
-	TM_THREAD_ENTER();
+	//TM_THREAD_ENTER();
 	/* Wait on barrier */
 	barrier_cross(d->barrier);
+
+	  //EDITED PORTION BY MADHAVA
+  int start = d->start_index;
+  int end = d->end_index;
+
+  int** arr_ptr = d->arrays;
+  int* update_vals = arr_ptr[0];
+  int* delete_vals = arr_ptr[1];
+  int* search_vals = arr_ptr[2];
+
+  int iterator = 0;
+
+  for(iterator = 0; iterator < 53; iterator++){
+      printf("VALUEEEEEE!!! %d\n", update_vals[iterator]);
+  }
+
+  printf("%d\n", update_vals[SIZE-1]);
 	
-	/* Is the first op an update? */
-	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
+  //END OF EDITED PORTION BY MADHAVA
+
+long long int i, j, k;
+
+
+  //edited
+  // <-------------------------------------------------------------------------------------------->
+
+    
+    i = start, j = start, k = start;
+    
+    while(i<end || j < end || k < end){
+        //insert
+        if(i < end){
+          val = update_vals[i];
+          if (set_add(d->set, val, TRANSACTIONAL)) {
+              printf("added : %ld\n", val);
+              d->nb_added++;
+          }
+          printf("tried adding : %ld\n", val);
+          d->nb_add++;
+          i++;
+        }
+
+        //remove
+        if(j < end){
+          val = delete_vals[j];
+          if (set_remove(d->set, val, TRANSACTIONAL)) {
+              printf("removed : %ld\n", val);
+              d->nb_removed++;
+          } 
+          printf("tried removing : %ld\n", val);
+          d->nb_remove++;
+          j++;
+        }
+
+        //contains
+        if(k < end){
+          val = search_vals[k];
+          if (set_contains(d->set, val, TRANSACTIONAL)) {
+              printf("FOUND : %ld\n", val);
+              d->nb_found++;
+          }
+          printf("tried finding : %ld\n", val);
+          d->nb_contains++;
+          k++;	
+        }
+    }
+
+  // <-------------------------------------------------------------------------------------------->
 	
-#ifdef ICC 
-	while (stop == 0) {
-#else
-	while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
+// 	/* Is the first op an update? */
+// 	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
+	
+// #ifdef ICC 
+// 	while (stop == 0) {
+// #else
+// 	while (AO_load_full(&stop) == 0) {
+// #endif /* ICC */
 		
-		if (unext) { // update
+// 		if (unext) { // update
 			
-			if (last < 0) { // add
+// 			if (last < 0) { // add
 		
-				val = rand_range_re(&d->seed, d->range);
-				if (set_add(d->set, val, TRANSACTIONAL)) {
-					d->nb_added++;
-					last = val;
-				} 				
-				d->nb_add++;
+// 				val = rand_range_re(&d->seed, d->range);
+// 				if (set_add(d->set, val, TRANSACTIONAL)) {
+// 					d->nb_added++;
+// 					last = val;
+// 				} 				
+// 				d->nb_add++;
 				
-			} else { // remove
+// 			} else { // remove
 				
-				if (d->alternate) { // alternate mode (default)
-					if (set_remove(d->set, last, TRANSACTIONAL)) {
-						d->nb_removed++;
-					} 
-					last = -1;
-				} else {
-					/* Random computation only in non-alternated cases */
-					val = rand_range_re(&d->seed, d->range);
-					/* Remove one random value */
-					if (set_remove(d->set, val, TRANSACTIONAL)) {
-						d->nb_removed++;
-						/* Repeat until successful, to avoid size variations */
-						last = -1;
-					} 
-				}
-				d->nb_remove++;
-			}
+// 				if (d->alternate) { // alternate mode (default)
+// 					if (set_remove(d->set, last, TRANSACTIONAL)) {
+// 						d->nb_removed++;
+// 					} 
+// 					last = -1;
+// 				} else {
+// 					/* Random computation only in non-alternated cases */
+// 					val = rand_range_re(&d->seed, d->range);
+// 					/* Remove one random value */
+// 					if (set_remove(d->set, val, TRANSACTIONAL)) {
+// 						d->nb_removed++;
+// 						/* Repeat until successful, to avoid size variations */
+// 						last = -1;
+// 					} 
+// 				}
+// 				d->nb_remove++;
+// 			}
 			
-		} else { // read
+// 		} else { // read
 				
-			if (d->alternate) {
-				if (d->update == 0) {
-					if (last < 0) {
-						val = d->first;
-						last = val;
-					} else { // last >= 0
-						val = rand_range_re(&d->seed, d->range);
-						last = -1;
-					}
-				} else { // update != 0
-					if (last < 0) {
-						val = rand_range_re(&d->seed, d->range);
-						//last = val;
-					} else {
-						val = last;
-					}
-				}
-			}	else val = rand_range_re(&d->seed, d->range);
+// 			if (d->alternate) {
+// 				if (d->update == 0) {
+// 					if (last < 0) {
+// 						val = d->first;
+// 						last = val;
+// 					} else { // last >= 0
+// 						val = rand_range_re(&d->seed, d->range);
+// 						last = -1;
+// 					}
+// 				} else { // update != 0
+// 					if (last < 0) {
+// 						val = rand_range_re(&d->seed, d->range);
+// 						//last = val;
+// 					} else {
+// 						val = last;
+// 					}
+// 				}
+// 			}	else val = rand_range_re(&d->seed, d->range);
 			
-			if (set_contains(d->set, val, TRANSACTIONAL)) 
-				d->nb_found++;
-			d->nb_contains++;
+// 			if (set_contains(d->set, val, TRANSACTIONAL)) 
+// 				d->nb_found++;
+// 			d->nb_contains++;
 	
-		}
+// 		}
 		
-		/* Is the next op an update? */
-		if (d->effective) { // a failed remove/add is a read-only tx
-			unext = ((100 * (d->nb_added + d->nb_removed))
-						 < (d->update * (d->nb_add + d->nb_remove + d->nb_contains)));
-		} else { // remove/add (even failed) is considered as an update
-			unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
-		}
+// 		/* Is the next op an update? */
+// 		if (d->effective) { // a failed remove/add is a read-only tx
+// 			unext = ((100 * (d->nb_added + d->nb_removed))
+// 						 < (d->update * (d->nb_add + d->nb_remove + d->nb_contains)));
+// 		} else { // remove/add (even failed) is considered as an update
+// 			unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
+// 		}
 		
-#ifdef ICC
-	}
-#else
-	}
-#endif /* ICC */
+// #ifdef ICC
+// 	}
+// #else
+// 	}
+// #endif /* ICC */
 	
-	/* Free transaction */
-	TM_THREAD_EXIT();
+// 	/* Free transaction */
+//TM_THREAD_EXIT();
 	
-	return NULL;
+// 	return NULL;
 }
 
 /*void catcher(int sig) {
@@ -388,25 +469,69 @@ int main(int argc, char **argv) {
 		srand(seed);
 	
 	set = set_new();
+
+	//MODIFIED PART BY MADHAVA
+  FILE* init_vals   = fopen(INIT_PATH  , "r");
+  FILE* update_vals = fopen(UPDATE_PATH, "r");
+  FILE* delete_vals = fopen(DELETE_PATH, "r");
+  FILE* search_vals = fopen(SEARCH_PATH, "r");
+
+  int* init_data   = (int*) malloc(sizeof(int) *SIZE);
+  int* update_data = (int*) malloc(sizeof(int) *SIZE);
+  int* delete_data = (int*) malloc(sizeof(int) *SIZE);
+  int* search_data = (int*) malloc(sizeof(int) *SIZE);
+
+  int iterator = 0;
+  while(iterator < SIZE){
+    fscanf(init_vals,   " %d", init_data   +iterator);          //RESULT IGNORED
+    fscanf(update_vals, " %d", update_data +iterator);          //RESULT IGNORED
+    fscanf(delete_vals, " %d", delete_data +iterator);          //RESULT IGNORED
+    fscanf(search_vals, " %d", search_data +iterator);          //RESULT IGNORED
+    iterator++;
+  }
+
+  // for(iterator = 0; iterator < 53; iterator++){
+  //     printf("%d\n", init_data[iterator]);
+  // }
+
+  // printf("%d\n", init_data[SIZE-1]);
+
+  //Creating pointer to arrays
+  int** arr_ptr = malloc(3*sizeof(int*));
+  arr_ptr[0] = update_data;
+  arr_ptr[1] = delete_data;
+  arr_ptr[2] = search_data;
+
+  //END OF MODIFIED PART BY MADHAVA
+
+  
 	stop = 0;
 	
 	/* Init STM */
 	printf("Initializing STM\n");
 	
-	TM_STARTUP();
+	//TM_STARTUP();
 	
 	/* Populate set */
 	printf("Adding %d entries to set\n", initial);
 	i = 0;
 	while (i < initial) {
-		val = rand_range(range);
+    	val = init_data[i];		
+		//val = rand_range(range);
 		if (set_add(set, val, 0)) {
 			last = val;
 			i++;
 		}
+		i++;
 	}
 	size = set_size(set);
 	printf("Set size     : %d\n", size);
+	int block_size = SIZE/nb_threads;                         //EDITED BY MADHAVA
+                                                            //NUMBER OF ELEMENTS PER BLOCK
+
+  	int prev = 0;                                             //EDITED BY MADHAVA: starting index of array split
+  	int next = block_size;                                    //EDITED BY MADHAVA: ending index of array split
+
 	
 	/* Access set from all threads */
 	barrier_init(&barrier, nb_threads + 1);
@@ -438,6 +563,9 @@ int main(int argc, char **argv) {
 		data[i].seed = rand();
 		data[i].set = set;
 		data[i].barrier = &barrier;
+		data[i].arrays = arr_ptr;                             //EDITED BY MADHAVA
+    	data[i].start_index = prev + i*block_size;            //EDITED BY MADHAVA
+    	data[i].end_index = next + i*block_size;              //EDITED BY MADHAVA
 		data[i].failures_because_contention = 0;
 		if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
 			fprintf(stderr, "Error creating thread\n");
@@ -449,23 +577,23 @@ int main(int argc, char **argv) {
 	/* Start threads */
 	barrier_cross(&barrier);
 	
-	printf("STARTING...\n");
-	gettimeofday(&start, NULL);
-	if (duration > 0) {
-		nanosleep(&timeout, NULL);
-	} else {
-		sigemptyset(&block_set);
-		sigsuspend(&block_set);
-	}
+// 	printf("STARTING...\n");
+// 	gettimeofday(&start, NULL);
+// 	if (duration > 0) {
+// 		nanosleep(&timeout, NULL);
+// 	} else {
+// 		sigemptyset(&block_set);
+// 		sigsuspend(&block_set);
+// 	}
 	
-#ifdef ICC
-	stop = 1;
-#else	
-	AO_store_full(&stop, 1);
-#endif /* ICC */
+// #ifdef ICC
+// 	stop = 1;
+// #else	
+// 	AO_store_full(&stop, 1);
+// #endif /* ICC */
 	
-	gettimeofday(&end, NULL);
-	printf("STOPPING...\n");
+// 	gettimeofday(&end, NULL);
+// 	printf("STOPPING...\n");
 	
 	/* Wait for thread completion */
 	for (i = 0; i < nb_threads; i++) {
@@ -571,7 +699,7 @@ int main(int argc, char **argv) {
 	set_delete(set);
 	
 	/* Cleanup STM */
-	TM_SHUTDOWN();
+	//TM_SHUTDOWN();
 	
 	free(threads);
 	free(data);
