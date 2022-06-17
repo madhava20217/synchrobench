@@ -7,7 +7,7 @@ ifeq ($(STM),SEQUENTIAL)
 else ifeq ($(STM),LOCKFREE)
   BINS = $(BINDIR)/lockfree-linkedlist
 else
-  BINS = $(BINDIR)/$(STM)-linkedlist
+  BINS = $(BINDIR)/$(STM)linkedlist
 endif
 CFLAGS += -std=gnu89
 

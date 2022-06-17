@@ -527,7 +527,7 @@ int main(int argc, char **argv) {
   	int prev = 0;                                             //EDITED BY MADHAVA: starting index of array split
   	int next = block_size;                                    //EDITED BY MADHAVA: ending index of array split
 
-	
+	clock_t start_time = clock();				//MODIFIED BY MADHAVA
 	/* Access set from all threads */
 	barrier_init(&barrier, nb_threads + 1);
 	pthread_attr_init(&attr);
@@ -581,7 +581,7 @@ int main(int argc, char **argv) {
 	// 	sigsuspend(&block_set);
 	// }
 
-	clock_t start_time = clock();				//MODIFIED BY MADHAVA
+
 	
 // #ifdef ICC
 // 	stop = 1;
@@ -655,7 +655,7 @@ int main(int argc, char **argv) {
 
 	clock_t stop_time = clock();										//MODIFIED BY MADHAVA
 
-	double dur = (double)(stop_time - start_time)/CLOCKS_PER_SEC;
+	double dur = (double)(stop_time - start_time)*1000/CLOCKS_PER_SEC;
 	printf("Set size      : %d (expected: %d)\n", set_size(set), size);
 	printf("Duration      : %lf (ms)\n", dur);
 	printf("#txs          : %lu (%f / s)\n", reads + updates, 
