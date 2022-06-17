@@ -120,7 +120,9 @@ typedef struct thread_data {
   unsigned long nb_aborts_invalid_memory;
   unsigned long max_retries;
   unsigned int seed;
-  int** arrays;
+  unsigned int start_index;                                   //EDITED BY MADHAVA
+  unsigned int end_index;                                     //EDITED BY MADHAVA
+  int** arrays;                                               //EDITED BY MADHAVA
   intset_l_t *set;
   barrier_t *barrier;
 } thread_data_t;
@@ -136,6 +138,9 @@ void *test(void *data) {
   barrier_cross(d->barrier);
 
   //EDITED PORTION BY MADHAVA
+  int start = d->start_index;
+  int end = d->end_index;
+
   int** arr_ptr = d->arrays;
   int* update_vals = arr_ptr[0];
   int* delete_vals = arr_ptr[1];
@@ -151,17 +156,18 @@ void *test(void *data) {
 	
   //END OF EDITED PORTION BY MADHAVA
 
-long long int i = 0, j = 0, k = 0;
+long long int i, j, k;
 
 
   //edited
   // <-------------------------------------------------------------------------------------------->
 
     
-    i = 0, j = 0, k = 0;
-    while(i<SIZE || j < SIZE || k < SIZE){
+    i = start, j = start, k = start;
+    
+    while(i<end || j < end || k < end){
         //insert
-        if(i < SIZE){
+        if(i < end){
           val = update_vals[i];
           if (set_add_l(d->set, val, TRANSACTIONAL)) {
               printf("added : %ld\n", val);
@@ -173,7 +179,7 @@ long long int i = 0, j = 0, k = 0;
         }
 
         //remove
-        if(j < SIZE){
+        if(j < end){
           val = delete_vals[j];
           if (set_remove_l(d->set, val, TRANSACTIONAL)) {
               printf("removed : %ld\n", val);
@@ -185,7 +191,7 @@ long long int i = 0, j = 0, k = 0;
         }
 
         //contains
-        if(k < SIZE){
+        if(k < end){
           val = search_vals[k];
           if (set_contains_l(d->set, val, TRANSACTIONAL)) {
               printf("FOUND : %ld\n", val);
@@ -498,6 +504,12 @@ int main(int argc, char **argv)
   size = set_size_l(set);
   printf("Set size     : %d\n", size);
 	
+  int block_size = SIZE/nb_threads;                         //EDITED BY MADHAVA
+                                                            //NUMBER OF ELEMENTS PER BLOCK
+
+  int prev = 0;                                             //EDITED BY MADHAVA: starting index of array split
+  int next = block_size;                                    //EDITED BY MADHAVA: ending index of array split
+
   /* Access set from all threads */
   barrier_init(&barrier, nb_threads + 1);
   pthread_attr_init(&attr);
@@ -528,7 +540,9 @@ int main(int argc, char **argv)
     data[i].seed = rand();
     data[i].set = set;
     data[i].barrier = &barrier;
-    data[i].arrays = arr_ptr;
+    data[i].arrays = arr_ptr;                             //EDITED BY MADHAVA
+    data[i].start_index = prev + i*block_size;            //EDITED BY MADHAVA
+    data[i].end_index = next + i*block_size;              //EDITED BY MADHAVA
     if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
       fprintf(stderr, "Error creating thread\n");
       exit(1);
