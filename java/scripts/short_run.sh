@@ -20,16 +20,16 @@ javaopt=-server
 
 stms="estm estmmvcc"
 syncs="lockfree"
-thread="2"
-size="10000"
+thread="1 2 4 8 12 16 32"       #modified
+size="16000 32000 64000"                   #modified
 
-writes="50"
-length="5000"
+writes="0 50"
+length="5000"                   #length of script running
 l="5000"
 warmup="0"
 snapshot="0"
 writeall="0"
-iterations="1"
+iterations="5"
 
 JVMARGS=-Dorg.deuce.exclude="java.util.*,java.lang.*,sun.*" 
 BOOTARGS=-Xbootclasspath/p:${dir}/lib/rt_instrumented.jar

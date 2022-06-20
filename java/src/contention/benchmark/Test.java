@@ -1,5 +1,8 @@
 package contention.benchmark;
 
+import java.io.File;					//added
+import java.io.IOException;				//added
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Formatter;
@@ -71,13 +74,17 @@ public class Test {
 	final private static ThreadLocal<Random> s_random = new ThreadLocal<Random>() {
 		@Override
 		protected synchronized Random initialValue() {
-			return new Random();
+			return new Random(200);
 		}
 	};
 
 	public void fill(final int range, final long size) {
+		File myFile = new File(
+			"/home/ml/Desktop/synchrobench/java/out.txt");			//file for printing
+
 		for (long i = size; i > 0;) {
 			Integer v = s_random.get().nextInt(range);
+
 			switch(benchType) {
 			case INTSET:
 				if (setBench.addInt(v)) {

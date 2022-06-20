@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Jun 17 10:56:57 2022
+# Make data base, printed on Mon Jun 20 21:51:18 2022
 
 # Variables
 
@@ -75,7 +75,7 @@ MAKE_HOST := x86_64-pc-linux-gnu
 # environment
 PATH = /home/ml/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
-SESSION_MANAGER = local/ml-unify:@/tmp/.ICE-unix/1596,unix/ml-unify:/tmp/.ICE-unix/1596
+SESSION_MANAGER = local/ml-unify:@/tmp/.ICE-unix/1525,unix/ml-unify:/tmp/.ICE-unix/1525
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -93,7 +93,7 @@ LS_COLORS =
 # environment
 XDG_SESSION_DESKTOP = xfce
 # environment
-SSH_AUTH_SOCK = /tmp/ssh-apH1B26an79k/agent.1596
+SSH_AUTH_SOCK = /tmp/ssh-a5gEseCadGGF/agent.1525
 # automatic
 %F = $(notdir $%)
 # environment
@@ -111,7 +111,7 @@ QT_QPA_PLATFORMTHEME = qt5ct
 # environment
 XDG_SEAT = seat0
 # environment
-SSH_AGENT_PID = 1676
+SSH_AGENT_PID = 1606
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = XFCE
 # environment
@@ -123,7 +123,7 @@ HOME = /home/ml
 # environment
 LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
-VSCODE_CODE_CACHE_PATH = /home/ml/.config/Code/CachedData/4af164ea3a06f701fe3e89a2bcbb421d2026b68f
+VSCODE_CODE_CACHE_PATH = /home/ml/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
 # environment
 LOGNAME = ml
 # environment
@@ -145,7 +145,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-a32d42b2-c1d9-49a6-8997-396d3c329be7.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-a4e87b05-9ec1-4641-85df-236e856f3321.sock
 # environment
 COMPIZ_CONFIG_PROFILE = mint
 # environment
@@ -171,7 +171,7 @@ LANGUAGE = en_IN:en
 # environment
 XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-c4540a08-1.68.0-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-c4540a08-1.68.1-main.sock
 # environment
 PANEL_GDK_CORE_DEVICE_EVENTS = 0
 # makefile
@@ -213,7 +213,7 @@ CHROME_DESKTOP = code-url-handler.desktop
 # environment
 LANG = C
 # environment
-VSCODE_PID = 35692
+VSCODE_PID = 3725
 # environment
 _CE_CONDA = 
 # variable set hash-table stats:
@@ -225,7 +225,7 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 53, inode 3282423): 11 files, no impossibilities.
+# . (device 54, inode 3282423): 11 files, no impossibilities.
 
 # 11 files, no impossibilities in 1 directories.
 
@@ -283,6 +283,6 @@ GNUmakefile:
 # strcache performance: lookups = 22 / hit rate = 13%
 # hash-table stats:
 # Load=19/8192=0%, Rehash=0, Collisions=1/22=5%
-# Finished Make data base on Fri Jun 17 10:56:57 2022
+# Finished Make data base on Mon Jun 20 21:51:18 2022
 
  
